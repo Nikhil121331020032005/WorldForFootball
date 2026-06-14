@@ -5,104 +5,301 @@ import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase/firebase";
 import { useState } from "react";
 import AuthModal from "./AuthModal";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
   const user = useSelector(
-  (state) => state.auth.user
-);
-const profile =
-  useUserProfile(
-    user?.uid
+    (state) => state.auth.user
   );
-const handleLogout =
-  async () => {
-    await signOut(auth);
-  };
 
-const isLoggedIn = !!user;
-const [showAuthModal, setShowAuthModal] =
-  useState(false);
+  const profile =
+    useUserProfile(user?.uid);
 
-const [authMode, setAuthMode] =
-  useState("login");
+  const isLoggedIn = !!user;
+
+  const [showAuthModal, setShowAuthModal] =
+    useState(false);
+
+  const [authMode, setAuthMode] =
+    useState("login");
+
+  const {
+    theme,
+    setTheme,
+  } = useTheme();
+
+  const handleLogout =
+    async () => {
+      await signOut(auth);
+    };
 
   return (
-    
-    <header className="border-b border-slate-800 bg-slate-950 sticky top-0 z-50">
+    <>
       <AuthModal
-  isOpen={showAuthModal}
-  onClose={() =>
-    setShowAuthModal(false)
-  }
-  initialMode={authMode}
-/>
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        isOpen={showAuthModal}
+        onClose={() =>
+          setShowAuthModal(false)
+        }
+        initialMode={authMode}
+      />
 
-        <Link
-          to="/"
-          className="flex items-center gap-3"
+      <header
+        className="
+        sticky
+        top-0
+        z-50
+        backdrop-blur-xl
+        border-b
+        transition-all
+        duration-300
+        "
+        style={{
+          background: "var(--card)",
+          borderColor: "var(--border)",
+        }}
+      >
+        <div
+          className="
+          max-w-[1400px]
+          mx-auto
+
+          px-4
+          md:px-6
+
+          h-auto
+          md:h-20
+
+          py-3
+          md:py-0
+
+          flex
+          flex-col
+          md:flex-row
+
+          gap-4
+          md:gap-0
+
+          items-start
+          md:items-center
+
+          justify-between
+          "
         >
-          <span className="text-3xl">⚽</span>
+          <Link
+            to="/"
+            className="flex items-center gap-3"
+          >
+            <div
+              className="
+              h-10
+              w-10
+              rounded-xl
+              bg-green-600
+              flex
+              items-center
+              justify-center
+              text-white
+              shrink-0
+              "
+            >
+              ⚽
+            </div>
 
-          <div>
-            <h1 className="font-bold text-white">
-              WC 2026 Fan Chat
-            </h1>
+            <div>
+              <h1
+                className="
+                font-bold
+                text-lg
+                md:text-xl
+                text-[var(--text)]
+                "
+              >
+                WorldForFootball
+              </h1>
 
-            <p className="text-xs text-slate-400">
-              USA • Canada • Mexico
-            </p>
-          </div>
-        </Link>
+              <p
+                className="
+                text-xs
+                md:text-sm
+                text-[var(--secondary)]
+                "
+              >
+                FIFA WC 2026 Fan Chat
+              </p>
+            </div>
+          </Link>
 
-        {isLoggedIn ? (
-          <div className="flex items-center gap-4">
-            <Link
-  to="/profile"
-  className="
-  px-4
-  py-2
-  rounded-full
-  bg-slate-900
-  border
-  border-slate-700
-  hover:border-green-500
-  transition
-  "
->
-  {profile?.team} {profile?.username}
-</Link>
+          <div
+            className="
+            flex
+            items-center
+            gap-2
+            md:gap-4
+
+            w-full
+            md:w-auto
+
+            justify-end
+            "
+          >
             <button
-  onClick={handleLogout}
-  className="text-slate-400"
->
-  Logout
-</button>
-          </div>
-        ) : (
-          <div className="flex gap-3">
-            <button
-  onClick={() => {
-    setAuthMode("login");
-    setShowAuthModal(true);
-  }}
-  className="px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-800"
->
-  Login
-</button>
+              onClick={() =>
+                setTheme(
+                  theme === "dark"
+                    ? "light"
+                    : "dark"
+                )
+              }
+              className="
+              btn-animate
 
-            <button
-  onClick={() => {
-    setAuthMode("register");
-    setShowAuthModal(true);
-  }}
-  className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700"
->
-  Register
-</button>
+              h-11
+              w-11
+
+              rounded-xl
+              border
+
+              flex
+              items-center
+              justify-center
+
+              text-lg
+              "
+              style={{
+                background:
+                  "var(--bg)",
+                borderColor:
+                  "var(--border)",
+                color:
+                  "var(--text)",
+              }}
+            >
+              {theme === "dark"
+                ? "☀️"
+                : "🌙"}
+            </button>
+
+            {isLoggedIn ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="
+                  btn-animate
+
+                  px-4
+                  md:px-5
+
+                  py-3
+
+                  rounded-xl
+                  border
+
+                  font-medium
+
+                  max-w-[180px]
+                  md:max-w-none
+
+                  truncate
+                  "
+                  style={{
+                    background:
+                      "var(--bg)",
+                    borderColor:
+                      "var(--border)",
+                    color:
+                      "var(--text)",
+                  }}
+                >
+                  {profile?.team}{" "}
+                  {profile?.username}
+                </Link>
+
+                <button
+                  onClick={
+                    handleLogout
+                  }
+                  className="
+                  btn-animate
+
+                  font-medium
+
+                  text-sm
+                  md:text-base
+                  "
+                  style={{
+                    color:
+                      "var(--secondary)",
+                  }}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setAuthMode(
+                      "login"
+                    );
+                    setShowAuthModal(
+                      true
+                    );
+                  }}
+                  className="
+                  btn-animate
+
+                  px-4
+                  md:px-5
+
+                  py-3
+
+                  rounded-xl
+                  border
+                  "
+                  style={{
+                    background:
+                      "var(--bg)",
+                    borderColor:
+                      "var(--border)",
+                    color:
+                      "var(--text)",
+                  }}
+                >
+                  Login
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAuthMode(
+                      "register"
+                    );
+                    setShowAuthModal(
+                      true
+                    );
+                  }}
+                  className="
+                  btn-animate
+
+                  px-4
+                  md:px-5
+
+                  py-3
+
+                  rounded-xl
+
+                  bg-green-600
+                  text-white
+
+                  hover:bg-green-700
+                  "
+                >
+                  Register
+                </button>
+              </>
+            )}
           </div>
-        )}
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }

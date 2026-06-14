@@ -1,10 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+
 import MainLayout from "../layouts/MainLayout";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import AuthModal from "../components/AuthModal";
+
 import useMessages from "../hooks/useMessages";
 import useAutoScroll from "../hooks/useAutoScroll";
 import useMatch from "../hooks/useMatch";
@@ -13,117 +15,317 @@ import usePresence from "../hooks/usePresence";
 
 export default function ChatRoom() {
   const user = useSelector(
-  (state) => state.auth.user
-);
+    (state) => state.auth.user
+  );
 
-  
   const isAuthenticated = !!user;
+
   const { roomId } = useParams();
+
   const match = useMatch(roomId);
-  const messages = useMessages(roomId);
+
+  const messages =
+    useMessages(roomId);
+
   useRoomPresence(
-  roomId,
-  user
-);
-const onlineCount = usePresence(roomId);
-  const bottomRef = useAutoScroll(messages);
-  
+    roomId,
+    user
+  );
 
-  const [showAuthModal, setShowAuthModal] =
-    useState(false);
+  const onlineCount =
+    usePresence(roomId);
 
- 
+  const bottomRef =
+    useAutoScroll(messages);
 
-  
+  const [
+    showAuthModal,
+    setShowAuthModal,
+  ] = useState(false);
 
   return (
     <MainLayout>
+      <div
+        className="
+        min-h-screen
+        bg-[var(--bg)]
+        transition-all
+        duration-300
+        "
+      >
+        <div
+          className="
+          max-w-[1400px]
+          mx-auto
 
-      <div className="max-w-6xl mx-auto h-[calc(100vh-64px)] flex flex-col">
+          px-4
+          sm:px-6
+          lg:px-8
 
-        <div className="border-b border-slate-800 p-5">
+          py-4
+          md:py-8
+          "
+        >
+          {match && (
+            <div
+              className="
+              bg-[var(--card)]
+              border
+              border-[var(--border)]
 
-         <h1 className="text-2xl font-bold">
+              rounded-3xl
 
-  {match
-    ? `${match.home_team_name_en}
-       vs
-       ${match.away_team_name_en}`
-    : "Loading..."}
+              p-5
+              md:p-8
 
-</h1>
-{match && (
-  <div className="mt-2 space-y-1">
+              mb-6
+              md:mb-8
 
-    <p className="text-slate-400">
+              transition-all
+              duration-300
+              "
+            >
+              <div
+                className="
+                flex
+                flex-col
 
-      Group {match.group}
+                md:flex-row
 
-    </p>
+                gap-6
 
-    <p className="font-semibold">
+                items-center
+                justify-between
+                "
+              >
+                <div
+                  className="
+                  text-center
+                  md:text-left
 
-      {match.home_score}
+                  flex-1
+                  "
+                >
+                  <p
+                    className="
+                    text-sm
+                    text-[var(--secondary)]
+                    mb-2
+                    "
+                  >
+                    Group {match.group}
+                  </p>
 
-      {" - "}
+                  <h2
+                    className="
+                    text-xl
+                    md:text-3xl
+                    font-bold
+                    text-[var(--text)]
+                    "
+                  >
+                    {match.home_team_name_en}
+                  </h2>
+                </div>
 
-      {match.away_score}
+                <div
+                  className="
+                  text-center
+                  "
+                >
+                  <div
+                    className="
+                    text-4xl
+                    md:text-6xl
+                    font-black
+                    text-[var(--text)]
+                    "
+                  >
+                    {match.home_score}
+                    -
+                    {match.away_score}
+                  </div>
 
-    </p>
+                  <div className="mt-3">
+                    {match.time_elapsed ===
+                    "notstarted" ? (
+                      <span
+                        className="
+                        px-4
+                        py-2
+                        rounded-full
+                        bg-blue-100
+                        text-blue-600
+                        text-sm
+                        font-semibold
+                        "
+                      >
+                        UPCOMING
+                      </span>
+                    ) : match.finished ===
+                      "TRUE" ? (
+                      <span
+                        className="
+                        px-4
+                        py-2
+                        rounded-full
+                        bg-green-100
+                        text-green-600
+                        text-sm
+                        font-semibold
+                        "
+                      >
+                        COMPLETED
+                      </span>
+                    ) : (
+                      <span
+                        className="
+                        px-4
+                        py-2
+                        rounded-full
+                        bg-red-100
+                        text-red-500
+                        text-sm
+                        font-semibold
+                        "
+                      >
+                        🔴 LIVE
+                        {match.time_elapsed !==
+                          "live" &&
+                          ` • ${match.time_elapsed}'`}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-    <p className="text-sm text-slate-500">
+                <div
+                  className="
+                  text-center
+                  md:text-right
 
-      {match.local_date}
+                  flex-1
+                  "
+                >
+                  <p
+                    className="
+                    text-sm
+                    text-[var(--secondary)]
+                    mb-2
+                    "
+                  >
+                    {match.local_date}
+                  </p>
 
-    </p>
+                  <h2
+                    className="
+                    text-xl
+                    md:text-3xl
+                    font-bold
+                    text-[var(--text)]
+                    "
+                  >
+                    {match.away_team_name_en}
+                  </h2>
+                </div>
+              </div>
 
-    <p className="text-sm">
+              <div
+                className="
+                mt-6
+                pt-6
 
-      Status:
+                border-t
+                border-[var(--border)]
 
-      {" "}
+                flex
+                flex-col
+                md:flex-row
 
-      {match.time_elapsed}
+                gap-3
 
-    </p>
+                justify-between
+                items-center
+                "
+              >
+                <p
+                  className="
+                  text-[var(--secondary)]
+                  "
+                >
+                  Match Discussion
+                </p>
 
-  </div>
-)}
+                <div
+                  className="
+                  font-semibold
+                  text-green-500
+                  "
+                >
+                  🔥 {onlineCount} fans online
+                </div>
+              </div>
+            </div>
+          )}
 
-          <p className="text-slate-400 mt-2">
-             🔥 {onlineCount} fans online
-          </p>
+          <div
+            className="
+            bg-[var(--card)]
+            border
+            border-[var(--border)]
 
+            rounded-3xl
+            overflow-hidden
+
+            transition-all
+            duration-300
+            "
+          >
+            <div
+              className="
+              h-[55vh]
+              md:h-[650px]
+
+              overflow-y-auto
+
+              p-4
+              md:p-6
+
+              space-y-6
+              "
+            >
+              {messages.map(
+                (message) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                  />
+                )
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+
+            <ChatInput
+              roomId={roomId}
+              isAuthenticated={
+                isAuthenticated
+              }
+              openAuthModal={() =>
+                setShowAuthModal(
+                  true
+                )
+              }
+            />
+          </div>
         </div>
-
-<div className="flex-1 overflow-y-auto p-5 space-y-6">
-
-  {messages.map((message) => (
-    <ChatMessage
-      key={message.id}
-      message={message}
-    />
-  ))}
-
-  <div ref={bottomRef}></div>
-
-</div>
-
-        <ChatInput
-        roomId={roomId}
-          isAuthenticated={isAuthenticated}
-          openAuthModal={() =>
-            setShowAuthModal(true)
-          }
-        />
-
       </div>
 
       <AuthModal
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
+        onClose={() =>
+          setShowAuthModal(false)
+        }
       />
-
     </MainLayout>
   );
 }

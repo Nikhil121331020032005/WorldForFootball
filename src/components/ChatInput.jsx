@@ -1,167 +1,375 @@
 import { useState } from "react";
-import useUserProfile from "../hooks/useUserProfile";
-import { sendMessage } from "../services/chat";
-import EmojiPicker from "emoji-picker-react";
 import { useSelector } from "react-redux";
-export default function ChatInput({roomId,
+
+import EmojiPicker from "emoji-picker-react";
+
+import useUserProfile from "../hooks/useUserProfile";
+
+import { sendMessage } from "../services/chat";
+import { sendGif } from "../services/chat";
+
+import GifPicker from "./GifPicker";
+
+export default function ChatInput({
+  roomId,
   isAuthenticated,
   openAuthModal,
 }) {
-
   const [message, setMessage] =
-  useState("");
-  const [showEmojiPicker, setShowEmojiPicker] =
-  useState(false);
-  const [showGifPanel, setShowGifPanel] =
-  useState(false);
+    useState("");
 
-const user = useSelector(
-  (state) => state.auth.user
-);
-const profile = useUserProfile(
-  user?.uid
-);
-const handleSend = async () => {
+  const [
+    showEmojiPicker,
+    setShowEmojiPicker,
+  ] = useState(false);
 
-  if (!isAuthenticated) {
-    openAuthModal();
-    return;
-  }
+  const [
+    showGifPanel,
+    setShowGifPanel,
+  ] = useState(false);
 
-  if (!message.trim()) return;
-
-  await sendMessage(
-    roomId,
-    user,
-    message
+  const user = useSelector(
+    (state) => state.auth.user
   );
 
-  setMessage("");
-};
+  const profile =
+    useUserProfile(user?.uid);
+
+  const handleSend =
+    async () => {
+      if (!isAuthenticated) {
+        openAuthModal();
+        return;
+      }
+
+      if (!message.trim())
+        return;
+
+      await sendMessage(
+        roomId,
+        user,
+        message
+      );
+
+      setMessage("");
+    };
+
   return (
-    <div className="border-t border-slate-800 p-4 bg-slate-900">
-{showEmojiPicker && (
-  <div className="mb-3">
+    <div
+      className="
+      relative
 
-    <EmojiPicker
-      onEmojiClick={(emojiData) => {
-        setMessage(
-          (prev) =>
-            prev +
-            emojiData.emoji
-        );
-      }}
-    />
+      border-t
+      border-[var(--border)]
 
-  </div>
-)}
-{showGifPanel && (
-  <div
-    className="
-    mb-3
-    bg-slate-800
-    p-4
-    rounded-xl
-    "
-  >
-    GIF Panel Coming Soon
-  </div>
-)}
-      <div className="flex gap-3">
+      bg-[var(--card)]
+
+      p-3
+      md:p-5
+
+      transition-all
+      duration-300
+      "
+    >
+      {showEmojiPicker && (
+        <div
+          className="
+          absolute
+
+          bottom-24
+
+          left-2
+          md:left-5
+
+          z-50
+
+          max-w-[95vw]
+
+          overflow-hidden
+
+          rounded-2xl
+
+          shadow-2xl
+
+          border
+          border-[var(--border)]
+          "
+        >
+          <div
+            className="
+            flex
+            items-center
+            justify-between
+
+            px-4
+            py-3
+
+            bg-[var(--card)]
+
+            border-b
+            border-[var(--border)]
+            "
+          >
+            <h3
+              className="
+              font-semibold
+              text-[var(--text)]
+              "
+            >
+              Emojis
+            </h3>
+
+            <button
+              onClick={() =>
+                setShowEmojiPicker(
+                  false
+                )
+              }
+              className="
+              text-[var(--secondary)]
+              hover:text-red-500
+              "
+            >
+              ✕
+            </button>
+          </div>
+
+          <EmojiPicker
+            onEmojiClick={(
+              emojiData
+            ) => {
+              setMessage(
+                (prev) =>
+                  prev +
+                  emojiData.emoji
+              );
+            }}
+          />
+        </div>
+      )}
+
+      {showGifPanel && (
+        <GifPicker
+          onClose={() =>
+            setShowGifPanel(
+              false
+            )
+          }
+          onSelect={async (
+            gif
+          ) => {
+            await sendGif(
+              roomId,
+              user,
+              gif.file.md.gif.url
+            );
+
+            setShowGifPanel(
+              false
+            );
+          }}
+        />
+      )}
+
+      <div
+        className="
+        flex
+        items-center
+        gap-2
+        md:gap-3
+        "
+      >
         <button
-  onClick={() =>
-    setShowEmojiPicker(
-      !showEmojiPicker
-    )
-  }
-  className="
-  bg-slate-800
-  px-4
-  rounded-xl
-  text-xl
-  "
->
-  😀
-</button>
+          onClick={() =>
+            setShowEmojiPicker(
+              !showEmojiPicker
+            )
+          }
+          className="
+          btn-animate
 
-<button
-  onClick={() =>
-    setShowGifPanel(
-      !showGifPanel
-    )
-  }
-  className="
-  bg-slate-800
-  px-4
-  rounded-xl
-  "
->
-  GIF
-</button>
+          h-11
+          w-11
+
+          md:h-12
+          md:w-12
+
+          shrink-0
+
+          rounded-2xl
+
+          bg-[var(--card2)]
+
+          border
+          border-[var(--border)]
+
+          text-lg
+          md:text-xl
+          "
+        >
+          😀
+        </button>
+
+        <button
+          onClick={() =>
+            setShowGifPanel(
+              !showGifPanel
+            )
+          }
+          className="
+          btn-animate
+
+          px-3
+          md:px-5
+
+          h-11
+          md:h-12
+
+          shrink-0
+
+          rounded-2xl
+
+          bg-[var(--card2)]
+
+          border
+          border-[var(--border)]
+
+          font-medium
+
+          text-[var(--text)]
+          "
+        >
+          GIF
+        </button>
 
         <input
           type="text"
           value={message}
           onChange={(e) =>
-  setMessage(
-    e.target.value
-  )
-}
-  onKeyDown={async (e) => {
-    if (e.key !== "Enter") return;
+            setMessage(
+              e.target.value
+            )
+          }
+          onKeyDown={async (
+            e
+          ) => {
+            if (
+              e.key !== "Enter"
+            )
+              return;
 
-    if (!isAuthenticated) {
-      openAuthModal();
-      return;
-    }
+            if (
+              !isAuthenticated
+            ) {
+              openAuthModal();
+              return;
+            }
 
-    await sendMessage(
-      roomId,
-      user,
-      message
-    );
+            await sendMessage(
+              roomId,
+              user,
+              message
+            );
 
-    setMessage("");
-  }}
+            setMessage("");
+          }}
           placeholder={
             isAuthenticated
-              ? "Join the conversation..."
-              : "Login required to chat"
+              ? "Message..."
+              : "Login required"
           }
-          disabled={!isAuthenticated}
-          className="flex-1 bg-slate-800 rounded-xl px-4 py-3 outline-none"
+          disabled={
+            !isAuthenticated
+          }
+          className="
+          flex-1
+
+          h-11
+          md:h-12
+
+          min-w-0
+
+          px-4
+
+          rounded-2xl
+
+          border
+          border-[var(--border)]
+
+          bg-[var(--card2)]
+
+          text-[var(--text)]
+
+          outline-none
+
+          focus:border-green-500
+          "
         />
 
-        <button 
+        <button
           onClick={handleSend}
-          onKeyDown={(e) => {
-  if (e.key === "Enter") {
-    handleSend();
-  }
-}}
-          className="bg-green-600 px-6 rounded-xl"
+          className="
+          btn-animate
+
+          h-11
+          md:h-12
+
+          px-4
+          md:px-8
+
+          shrink-0
+
+          rounded-2xl
+
+          bg-green-600
+
+          hover:bg-green-700
+
+          text-white
+          font-semibold
+
+          shadow-sm
+          "
         >
           Send
         </button>
+      </div>
 
-       </div>
+      {isAuthenticated &&
+        profile && (
+          <div
+            className="
+            mt-3
 
-  {isAuthenticated && profile && (
-    <div className="mt-2 text-sm text-slate-400">
+            text-xs
+            md:text-sm
 
-      Posting as
+            text-[var(--secondary)]
 
-      <span className="font-semibold text-white ml-1">
-        {profile.username}
-      </span>
+            truncate
+            "
+          >
+            Posting as
 
-      <span className="mx-2">•</span>
+            <span
+              className="
+              ml-1
 
-      {profile.team} supporter
+              font-semibold
 
+              text-[var(--text)]
+              "
+            >
+              {profile.username}
+            </span>
+
+            <span className="mx-2">
+              •
+            </span>
+
+            {profile.team}
+          </div>
+        )}
     </div>
-  )}
-
-</div>
   );
 }
