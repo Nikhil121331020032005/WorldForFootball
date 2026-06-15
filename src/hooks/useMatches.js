@@ -11,68 +11,98 @@ export default function useMatches() {
   const [error, setError] =
     useState(null);
 
-useEffect(() => {
+  useEffect(() => {
+    async function loadMatches() {
+      try {
+        const data =
+          await getMatches();
 
-  async function loadMatches() {
-    try {
+        setMatches(data);
+      } catch (err) {
+        console.error(err);
 
-      const data =
-        await getMatches();
-
-      setMatches(data);
-
-    } catch (err) {
-
-      console.error(err);
-
-      setError(err.message);
-
-    } finally {
-
-      setLoading(false);
-
+        setError(
+          err.message ||
+            "Failed to load matches"
+        );
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  loadMatches();
+    loadMatches();
 
-  const interval =
-    setInterval(
-      loadMatches,
-      30000
-    );
+    const interval =
+      setInterval(
+        loadMatches,
+        30000
+      );
 
-  return () =>
-    clearInterval(interval);
+    return () =>
+      clearInterval(interval);
+  }, []);
 
-}, []);
+  const completedMatches =
+    matches
+      .filter(
+        (match) =>
+          match.finished ===
+          "TRUE"
+      )
+      .sort(
+        (a, b) =>
+          new Date(
+            b.local_date
+          ) -
+          new Date(
+            a.local_date
+          )
+      );
 
- return {
-  matches,
+  const upcomingMatches =
+    matches
+      .filter(
+        (match) =>
+          match.finished ===
+            "FALSE" &&
+          match.time_elapsed ===
+            "notstarted"
+      )
+      .sort(
+        (a, b) =>
+          new Date(
+            a.local_date
+          ) -
+          new Date(
+            b.local_date
+          )
+      );
 
-  completedMatches:
-    matches.filter(
-      (match) =>
-        match.finished === "TRUE"
-    ),
+  const liveMatches =
+    matches
+      .filter(
+        (match) =>
+          match.finished ===
+            "FALSE" &&
+          match.time_elapsed !==
+            "notstarted"
+      )
+      .sort(
+        (a, b) =>
+          Number(
+            b.time_elapsed
+          ) -
+          Number(
+            a.time_elapsed
+          )
+      );
 
-  upcomingMatches:
-    matches.filter(
-      (match) =>
-        match.finished === "FALSE" &&
-        match.time_elapsed ===
-          "notstarted"
-    ),
-
-  liveMatches:
-    matches.filter(
-      (match) =>
-        match.finished === "FALSE" &&
-        match.time_elapsed !==
-          "notstarted"
-    ),
-
-  loading,
-  error,
-};
+  return {
+    matches,
+    completedMatches,
+    upcomingMatches,
+    liveMatches,
+    loading,
+    error,
+  };
 }
